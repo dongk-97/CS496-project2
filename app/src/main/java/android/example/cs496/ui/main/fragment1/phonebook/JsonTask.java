@@ -214,7 +214,7 @@ public class JsonTask extends AsyncTask<String, String, String> {
                     BufferedReader reader = null;
 
                     try {
-                        URL url = new URL(urls[0]);//url을 가져온다.
+                        URL url = new URL("http://143.248.36.219:8080/initialize");//url을 가져온다.
                         con = (HttpURLConnection) url.openConnection();
                         con.connect();//연결 수행
                         InputStream stream = con.getInputStream();
