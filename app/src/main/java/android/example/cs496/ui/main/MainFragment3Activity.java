@@ -1,10 +1,14 @@
 package android.example.cs496.ui.main;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.example.cs496.R;
+import android.example.cs496.ui.main.fragment1.phonebook.Contact;
+import android.example.cs496.ui.main.fragment1.phonebook.JsonTask;
 import android.example.cs496.ui.main.fragment3.ForeCastManager;
 import android.example.cs496.ui.main.fragment3.WeatherInfo;
 import android.graphics.Bitmap;
@@ -16,8 +20,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.health.SystemHealthManager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +81,9 @@ public class MainFragment3Activity extends AppCompatActivity {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000;
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60; // 1분 --> 1시간간
 
+    String gender = "gender";
+    String Style = "style";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +94,148 @@ public class MainFragment3Activity extends AppCompatActivity {
         textView.setText(time);
         reset = findViewById(R.id.reset);
         reset.setOnClickListener(new MyListener());
-        Initialize();
+        Initialize();//필요
+        TextView today_style = (TextView) findViewById(R.id.select_button);
+        today_style.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainFragment3Activity.this);
+                View view = LayoutInflater.from(MainFragment3Activity.this).inflate(R.layout.select_box, null, false);
+                builder.setView(view);
+
+                final Button ButtonSubmit = (Button) view.findViewById(R.id.button_dialog_select);
+                RadioGroup genderGroup = (RadioGroup) view.findViewById(R.id.radio1);
+                final RadioButton man = (RadioButton) view.findViewById(R.id.man);
+                final RadioButton woman = (RadioButton) view.findViewById(R.id.woman);
+
+
+                RadioGroup styleGroup = (RadioGroup) view.findViewById(R.id.radio2);
+                final RadioButton street = (RadioButton) view.findViewById(R.id.street);
+                final RadioButton dandy = (RadioButton) view.findViewById(R.id.dandy);
+                final RadioButton classic = (RadioButton) view.findViewById(R.id.classic);
+                final RadioButton set = (RadioButton) view.findViewById(R.id.set);
+                final RadioButton sporty = (RadioButton) view.findViewById(R.id.sporty);
+                final RadioButton casual = (RadioButton) view.findViewById(R.id.casual);
+
+                genderGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                        switch (i){
+                            case R.id.man:
+                                if(gender.equals("man")){
+                                    man.setChecked(false);
+                                    gender = "gender";
+                                }else{
+                                    gender = "man";
+                                }
+                                break;
+                            case R.id.woman:
+                                if(gender.equals("woman")){
+                                    woman.setChecked(false);
+                                    gender = "gender";
+                                }else{
+                                    gender = "woman";
+                                }
+                                break;
+                        }
+                    }
+                });
+
+                styleGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                        switch (i){
+                            case R.id.street:
+                                if(Style.equals("street")){
+                                    street.setChecked(false);
+                                    Style = "style";
+                                }else{
+                                    Style = "street";
+                                }
+                                break;
+                            case R.id.casual:
+                                if(Style.equals("casual")){
+                                    casual.setChecked(false);
+                                    Style = "style";
+                                }else{
+                                    Style = "casual";
+                                }
+                                break;
+                            case R.id.dandy:
+                                if(Style.equals("dandy")){
+                                    dandy.setChecked(false);
+                                    Style = "style";
+                                }else{
+                                    Style = "dandy";
+                                }
+                                break;
+                            case R.id.set:
+                                if(Style.equals("set")){
+                                    set.setChecked(false);
+                                    Style = "style";
+                                }else{
+                                    Style = "set";
+                                }
+                                break;
+                            case R.id.classic:
+                                if(Style.equals("classic")){
+                                    classic.setChecked(false);
+                                    Style = "style";
+                                }else{
+                                    Style = "classic";
+                                }
+                                break;
+                            case R.id.sporty:
+                                if(Style.equals("sporty")){
+                                    sporty.setChecked(false);
+                                    Style = "style";
+                                }else{
+                                    Style = "sporty";
+                                }
+                                break;
+                        }
+                    }
+                });
+
+                final AlertDialog dialog = builder.create();
+
+                ButtonSubmit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(!gender.equals("gender")&&!Style.equals("style")){
+                            Context context = MainFragment3Activity.this;
+                            Toast.makeText(context, "LOADING...", Toast.LENGTH_SHORT).show();
+
+                            String temperature = tv_WeatherInfo1.getText().toString();
+                            int length = temperature.length();
+                            temperature = temperature.substring(0,length-3);
+                            String humidity = tv_WeatherInfo2.getText().toString();
+                            String wind = tv_WeatherInfo3.getText().toString();
+                            String clouds = tv_WeatherInfo4.getText().toString();
+                            String precipitation = tv_WeatherInfo5.getText().toString();
+                            String temp = tempSelecter(Float.parseFloat(temperature));
+                            Intent intent = new Intent(context, ClothesSelect.class);
+                            intent.putExtra("gender", gender);
+                            intent.putExtra("style", Style);
+                            intent.putExtra("temp", temp);
+                            intent.putExtra("temperature", temperature);
+                            intent.putExtra("humidity", humidity);
+                            intent.putExtra("wind", wind);
+                            intent.putExtra("clouds", clouds);
+                            intent.putExtra("precipitation", precipitation);
+                            startActivity(intent);
+                            dialog.dismiss();
+                        }else{
+                            Toast.makeText(MainFragment3Activity.this, "select both items", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                dialog.show();
+            }
+        });
+
+
     }
 
 
@@ -102,7 +255,7 @@ public class MainFragment3Activity extends AppCompatActivity {
         }
     }
 
-    public void Initialize() {
+    public void Initialize() {//필요-정보 불러오기
 
         tv_CityInfo = findViewById(R.id.CityInfo);
         tv_WeatherCat = findViewById(R.id.WeatherCat);
@@ -119,10 +272,10 @@ public class MainFragment3Activity extends AppCompatActivity {
         mThis = this;
         location = getLocation();
         mForeCast = new ForeCastManager(lon, lat, mThis);
-        mForeCast.run();
+        mForeCast.run();//쓰레드로 데이터 불러옴
     }
 
-    private LocationListener locationListener = new LocationListener() {
+    private LocationListener locationListener = new LocationListener() { //gps이용해서 위치 정보 리스너
 
         @Override
         public void onLocationChanged(Location location) {
@@ -267,6 +420,23 @@ public class MainFragment3Activity extends AppCompatActivity {
             }
         }
     };
+
+    public String tempSelecter(float temp){
+        if(temp<0){
+            return "verycold";
+
+        }else if(0<=temp && temp<10){
+            return "cold";
+
+        }else if(10<=temp && temp<20){
+            return "soso";
+
+        }else if(20<=temp && temp<30){
+            return "hot";
+        }else{
+            return "veryhot";
+        }
+    }
 }
 
 

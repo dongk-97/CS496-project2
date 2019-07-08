@@ -92,7 +92,7 @@ public class RecyclerViewDataAdapter extends RecyclerView.Adapter<RecyclerViewDa
 
         ImageView imageProfile = holder.imageProfile;
         imageProfile.setImageResource(R.drawable.kakao_1);
-        imageProfile.setBackgroundResource(R.drawable.background_rounding);
+        imageProfile.setBackgroundResource(R.drawable.background_round);
         imageProfile.setClipToOutline(true);
 
 

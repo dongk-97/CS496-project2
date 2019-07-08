@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/selectboxtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginRight="25dp"
+        android:fontFamily="@font/annie_use_your_telescope"
+        android:text="Today's style is..."
+        android:textColor="#1C5F7E"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        app:autoSizeTextType="uniform" />
+
+    <LinearLayout
+        android:layout_below="@id/selectboxtitle"
+        android:layout_width="300dp"
+        android:layout_height="260dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:orientation="vertical"
+        android:id="@+id/select">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="20dp">
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:text = "gender"
+                android:gravity="center"/>
+            <RadioGroup
+                android:layout_width="220dp"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:id="@+id/radio1">
+                <RadioButton
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:text = "man"
+                    android:id="@+id/man"/>
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text = "women"
+                    android:id="@+id/woman"/>
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="190dp">
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:text="Style"
+                android:gravity="center"/>
+            <LinearLayout
+                android:layout_width="220dp"
+                android:layout_height="match_parent">
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/radio2">
+                    <RadioButton
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text = "casual"
+                        android:id="@+id/casual"/>
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text = "street"
+                        android:id="@+id/street" />
+
+                    <RadioButton
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text = "dandy"
+                        android:id="@+id/dandy"/>
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text = "classic"
+                        android:id="@+id/classic"/>
+                    <RadioButton
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text = "sporty"
+                        android:id="@+id/sporty"/>
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text = "set"
+                        android:id="@+id/set"/>
+
+                </RadioGroup>
+
+
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_dialog_select"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/annie_use_your_telescope"
+        android:text="go to select page"
+        android:layout_below="@id/select"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/background_rounding"
+        />
+
+
+</RelativeLayout>
