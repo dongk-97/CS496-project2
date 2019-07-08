@@ -8,7 +8,8 @@ import android.example.cs496.ui.main.fragment2.JsonTask;
 import android.example.cs496.ui.main.fragment2.Tab2Adapter;
 import android.example.cs496.ui.main.fragment2.multipartRequest;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +27,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
@@ -38,9 +41,9 @@ import static android.app.Activity.RESULT_OK;
 public class TabFragment2 extends Fragment{
 
     private String url = "http://143.248.36.219:8080/";
-    public ArrayList<BitmapClass> ArrayListOfEdit = new ArrayList<>();
+    public static ArrayList<BitmapClass> ArrayListOfEdit = new ArrayList<>();
     String currentPhotoPath;
-    public Context context;
+    public static Context tab2_context;
     File image;
     public static View view;
     private String filePath;
@@ -51,30 +54,23 @@ public class TabFragment2 extends Fragment{
     multipartRequest _multi;
     static Tab2Adapter adapter;
     static GridView gridView;
+    public static ArrayList<Bitmap> bitmapEditArr;
 
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
         final Fragment fragment = this;
-        context = getActivity();
+        tab2_context = getActivity();
         view = inflater.inflate(R.layout.tab_fragment2, container, false);
         gridView = view.findViewById(R.id.gridView1);
-        //adapter = new Tab2Adapter(context, inflater, ArrayListOfEdit);
-//        gridView.setAdapter(adapter);
-
-        BitmapClass bitmapClass = new BitmapClass();
-        Bitmap add_camera = BitmapFactory.decodeResource(getResources(), R.drawable.rose);
-        bitmapClass.setImg(add_camera);
-        bitmapClass.setPath("djksjflsjd");
-        ArrayListOfEdit.add(bitmapClass);
-//        adapter.notifyDataSetChanged();
-        adapter = new Tab2Adapter(context, inflater, ArrayListOfEdit);
+        bitmapEditArr = parseBitmap(ArrayListOfEdit);
+        adapter = new Tab2Adapter(tab2_context, inflater, bitmapEditArr);
         gridView.setAdapter(adapter);
 
-
         System.out.println("start loading");
-        JsonTask task = new JsonTask(ArrayListOfEdit, "LoadAll", adapter);
+        Toast.makeText(tab2_context,"loading...",Toast.LENGTH_SHORT).show();
+        JsonTask task = new JsonTask(ArrayListOfEdit, "LoadAll", adapter, bitmapEditArr, tab2_context);
         task.execute(url);
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -86,7 +82,7 @@ public class TabFragment2 extends Fragment{
                     String state = Environment.getExternalStorageState();
                     if(Environment.MEDIA_MOUNTED.equals(state)) {
                         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        if (intent.resolveActivity(context.getPackageManager()) != null) {
+                        if (intent.resolveActivity(tab2_context.getPackageManager()) != null) {
                             File photoFile = null;
                             try {
                                 photoFile = createImageFile();
@@ -104,13 +100,41 @@ public class TabFragment2 extends Fragment{
 
                 }
                 else {
-                    Intent intent = new Intent(context, Fragment2SubActivity.class);
-                    intent.putExtra("path", Tab2Adapter.getpicArr().get(position-1).getPath());
+                    Intent intent = new Intent(tab2_context, Fragment2SubActivity.class);
+                    intent.putExtra("path", ArrayListOfEdit.get(position-1).getPath());
                     startActivity(intent);
                 }
             }
         });
         return view;
+    }
+
+    <def> ArrayList<Bitmap> parseBitmap(ArrayList<BitmapClass> picArr){
+        ArrayList<Bitmap> bitmapArrayList = new ArrayList<Bitmap>();
+
+        Bitmap add_camera = getBitmapFromVectorDrawable(tab2_context, R.drawable.add_camera);
+        bitmapArrayList.add(add_camera);
+        System.out.println("parseBitmap");
+        for (int j = 0; j<picArr.size(); j++){
+            bitmapArrayList.add(picArr.get(j).getImg());
+        }
+
+        return bitmapArrayList;
+    }
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -159,17 +183,16 @@ public class TabFragment2 extends Fragment{
         File f = new File(currentPhotoPath);
         Uri contentUri = Uri.fromFile(f);
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, contentUri);
-        context.sendBroadcast(mediaScanIntent);
+        tab2_context.sendBroadcast(mediaScanIntent);
 
         _multi = new multipartRequest(this, currentPhotoPath);
         _multi.run();
 
-        Toast.makeText(context,"사진이 저장되었습니다",Toast.LENGTH_SHORT).show();
+        Toast.makeText(tab2_context,"사진이 저장되었습니다",Toast.LENGTH_SHORT).show();
     }
 
     public static void setnotify(Tab2Adapter adapter){
         adapter.notifyDataSetChanged();
-//        gridView.setAdapter(adapter);
     }
 
 
@@ -180,16 +203,19 @@ public class TabFragment2 extends Fragment{
             switch(msg.what){
                 case THREAD_HANDLER_SUCCESS_INFO :
                     System.out.println("SUCCESS");
-                    String result = "["+_multi.result()+"]";
+                    String result = _multi.result();
                     System.out.println(result);
                     System.out.println(ArrayListOfEdit.size());
-                    JsonTask task = new JsonTask(ArrayListOfEdit, "Upload", result, adapter);
-                    task.execute();
+//                    JsonTask task = new JsonTask(ArrayListOfEdit, "Upload", result, adapter, bitmapEditArr);
+//                    task.execute();
+                    JsonTask task = new JsonTask(ArrayListOfEdit, "LoadAll", adapter, bitmapEditArr, tab2_context);
+                    task.execute(url);
                     break;
                 default:
                     break;
             }
         }
     };
+
 
 }

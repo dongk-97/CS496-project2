@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryLight">@android:color/holo_blue_light</color>
-    <color name="colorPrimary">#2890b7</color>
-    <color name="colorPrimaryDark">#207392</color>
+    <color name="colorPrimaryLight">@android:color/holo_purple</color>
+    <color name="colorPrimary">#9C14B3</color>
+    <color name="colorPrimaryDark">#6f00cc</color>
     <color name="colorAccent">#D81B60</color>
 </resources>

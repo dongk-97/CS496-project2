@@ -1,11 +1,12 @@
 package android.example.cs496.ui.main.fragment2;
 
 import android.content.Context;
+import android.example.cs496.R;
+import android.example.cs496.ui.main.TabFragment2;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Base64;
-import android.view.LayoutInflater;
 import android.widget.GridView;
 
 import com.github.chrisbanes.photoview.PhotoView;
@@ -30,21 +31,25 @@ public class JsonTask extends AsyncTask<String, String, String> {
 
     public ArrayList<BitmapClass> ArrayListOfPhoto;
     public ArrayList<BitmapClass> subarray;
+    public ArrayList<Bitmap> bitmapArr;
     private String mstate;
     private String path;
     GridView gridView;
-    LayoutInflater inflater;
     Context context;
     PhotoView photoView;
     String result;
     Tab2Adapter adapter;
 
+
     //loadall
-    public JsonTask(ArrayList<BitmapClass> ArrayListOfPhoto, String state, Tab2Adapter _adapter){
+    public JsonTask(ArrayList<BitmapClass> ArrayListOfPhoto, String state,
+                    Tab2Adapter _adapter, ArrayList<Bitmap> bitmapArr, Context context){
         System.out.println("In JSONTask");
         this.ArrayListOfPhoto = ArrayListOfPhoto;
         this.mstate = state;
         this.adapter = _adapter;
+        this.bitmapArr = bitmapArr;
+        this.context = context;
     }
 
     public JsonTask(ArrayList<BitmapClass> subarray, String state, String path, PhotoView photoView){
@@ -52,20 +57,25 @@ public class JsonTask extends AsyncTask<String, String, String> {
         this.mstate = state;
         this.path = path;
         this.photoView = photoView;
-        System.out.println("right JsonTask");
     }
 
     //update
-    public JsonTask(ArrayList<BitmapClass> ArrayListOfPhoto, String mstate, String result, Tab2Adapter adapter){
+    public JsonTask(ArrayList<BitmapClass> ArrayListOfPhoto, String mstate, String result, Tab2Adapter adapter, ArrayList<Bitmap> bitmapArr){
         this.mstate = mstate;
         this.result = result;
         this.ArrayListOfPhoto = ArrayListOfPhoto;
         this.adapter = adapter;
+        this.bitmapArr = bitmapArr;
     }
+
+    public JsonTask(String mstate, String path){
+        this.mstate = mstate;
+        this.path = path;
+    }
+
 
     @Override
     protected String doInBackground(String... urls) {
-        String result = null;
         switch (mstate){
             case "LoadAll":
                 Retrofit retrofit_loadall = new Retrofit.Builder().baseUrl(API_URL).build();
@@ -75,10 +85,14 @@ public class JsonTask extends AsyncTask<String, String, String> {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try {
+                            String _response = response.body().string();
                             ArrayListOfPhoto.clear();
-                            ArrayListOfPhoto = jsontophototoArray(response.body().string(), ArrayListOfPhoto);
+                            ArrayListOfPhoto = jsontophototoArray(_response, ArrayListOfPhoto);
+                            bitmapArr.clear();
+                            Bitmap add_camera = TabFragment2.getBitmapFromVectorDrawable(context, R.drawable.add_camera);
+                            bitmapArr.add(add_camera);
+                            bitmapArr = jsontobitmaptoArray(_response, bitmapArr);
                             adapter.notifyDataSetChanged();
-                            //TabFragment2.setnotify(adapter);
                             System.out.println("arraylist length is "+ArrayListOfPhoto.size());
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -94,11 +108,14 @@ public class JsonTask extends AsyncTask<String, String, String> {
 
             case "Upload":
                 try {
-                    JSONArray array = new JSONArray(result);
-                    JSONObject obj = array.getJSONObject(0);
+                    JSONObject obj = new JSONObject(result);
+                    System.out.println("obj is "+obj);
                     BitmapClass bitmapClass = photocreater(obj);
                     ArrayListOfPhoto.add(bitmapClass);
+                    Bitmap bitmap = bitmapClass.getImg();
+                    bitmapArr.add(bitmap);
                     System.out.println("arraylist length is "+ArrayListOfPhoto.size());
+                    System.out.println("bitmapArr length is "+bitmapArr.size());
                     adapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -113,12 +130,11 @@ public class JsonTask extends AsyncTask<String, String, String> {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try {
-                            System.out.println("hi");
                             subarray.clear();
                             subarray = jsontophototoArray(response.body().string(), subarray);
                             System.out.println("setImageBitmap");
-                            ArrayListOfPhoto.remove(subarray.get(0));
                             photoView.setImageBitmap(subarray.get(0).getImg());
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -135,7 +151,7 @@ public class JsonTask extends AsyncTask<String, String, String> {
                 Retrofit retrofit_delete = new Retrofit.Builder().baseUrl(API_URL).build();
                 ApiService apiService_delete = retrofit_delete.create(ApiService.class);
                 // 나중에 path 수정하기
-                Call<ResponseBody> delete = (Call<ResponseBody>) apiService_delete.getpath("upload\\myImage-1562399223804");
+                Call<ResponseBody> delete = (Call<ResponseBody>) apiService_delete.getpath(path);
                 delete.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -167,6 +183,20 @@ public class JsonTask extends AsyncTask<String, String, String> {
         return arrayListOfPhotos;
     }
 
+    public ArrayList<Bitmap> jsontobitmaptoArray(String jsonstring, ArrayList<Bitmap> arrayListOfPhotos){
+        try {
+            JSONArray array = new JSONArray(jsonstring);
+            for (int i = 0; i<array.length(); i++){
+                JSONObject jObject = array.getJSONObject(i);
+                arrayListOfPhotos.add(photocreater(jObject).getImg());
+            }
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
+        return arrayListOfPhotos;
+    }
+
     public BitmapClass photocreater (JSONObject jObject) throws JSONException {
         BitmapClass bitmapClass = new BitmapClass();
         ArrayList<String> keys = new ArrayList<>();
@@ -188,5 +218,6 @@ public class JsonTask extends AsyncTask<String, String, String> {
         }
     return bitmapClass;
     }
+
 
 }
