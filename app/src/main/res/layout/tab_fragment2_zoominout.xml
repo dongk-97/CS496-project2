@@ -9,6 +9,11 @@
         android:id="@+id/photoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/panda"/>
+        android:src="@drawable/white"/>
 
+    <ImageView
+        android:id="@+id/trashcan"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/trash"/>
 </RelativeLayout>
